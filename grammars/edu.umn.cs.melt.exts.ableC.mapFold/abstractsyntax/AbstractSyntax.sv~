@@ -1,0 +1,274 @@
+grammar edu:umn:cs:melt:exts:ableC:mapFold:abstractsyntax;
+
+imports edu:umn:cs:melt:ableC:abstractsyntax:host;
+imports edu:umn:cs:melt:ableC:abstractsyntax:construction;
+imports edu:umn:cs:melt:ableC:abstractsyntax:substitution;
+imports edu:umn:cs:melt:ableC:abstractsyntax:env;
+imports edu:umn:cs:melt:ableC:abstractsyntax:overloadable;
+
+imports silver:langutil;
+imports silver:langutil:pp;
+
+abstract production nondestructiveMap
+top::Expr ::= f::Name a::Expr n::Integer
+{
+  propagate substituted;
+  top.pp = pp"map ${f.pp} (${a.pp}) ${text(toString(n))}";
+
+  local plainFwd :: Expr =
+    ableC_Expr {
+      ({ int *tmp_a = $Expr{a};
+         int *result = malloc($intLiteralExpr{n} * sizeof(int));
+         for (int i=0; i < $intLiteralExpr{n}; ++i) {
+           result[i] = $Name{f}(tmp_a[i]);
+         }
+         result;
+      })
+    };
+
+  local optmFwd :: Maybe<Expr> =
+    case a of
+      nondestructiveMap(f1, a1, _) ->
+        just(ableC_Expr {
+          ({ int *tmp_a = $Expr{a1};
+             int *result = malloc($intLiteralExpr{n} * sizeof(int));
+             for (int i=0; i < $intLiteralExpr{n}; ++i) {
+               result[i] = $Name{f}($Name{f1}(tmp_a[i]));
+             }
+             result;
+          })
+        })
+    | destructiveMap(f1, a1, _) ->
+        just(ableC_Expr {
+          ({ int *tmp_a = $Expr{a1};
+             int *result = malloc($intLiteralExpr{n} * sizeof(int));
+             for (int i=0; i < $intLiteralExpr{n}; ++i) {
+               tmp_a[i] = $Name{f1}(tmp_a[i]);
+               result[i] = $Name{f}(tmp_a[i]);
+             }
+             result;
+          })
+        })
+    | _ -> nothing()
+    end;
+
+  f.env = top.env;
+  a.env = top.env;
+  a.returnType = top.returnType;
+  local lerrors :: [Message] = a.errors ++ checkMapErrors(f, a, n, top.location);
+
+  forwards to
+    mkErrorCheck(lerrors,
+      case optmFwd of
+        just(fwd) -> fwd
+      | nothing() -> plainFwd
+      end
+    );
+}
+
+abstract production destructiveMap
+top::Expr ::= f::Name a::Expr n::Integer
+{
+  propagate substituted;
+  top.pp = pp"map! ${f.pp} (${a.pp}) ${text(toString(n))}";
+
+  local plainFwd :: Expr =
+    ableC_Expr {
+      ({ int *tmp_a = $Expr{a};
+         for (int i=0; i < $intLiteralExpr{n}; ++i) {
+           tmp_a[i] = $Name{f}(tmp_a[i]);
+         }
+         tmp_a;
+      })
+    };
+
+  local optmFwd :: Maybe<Expr> =
+    case a of
+      nondestructiveMap(f1, a1, _) ->
+        just(ableC_Expr {
+          ({ int *tmp_a = $Expr{a1};
+             int *result = malloc($intLiteralExpr{n} * sizeof(int));
+             for (int i=0; i < $intLiteralExpr{n}; ++i) {
+               result[i] = $Name{f}($Name{f1}(tmp_a[i]));
+             }
+             result;
+          })
+        })
+    | destructiveMap(f1, a1, _) ->
+        just(ableC_Expr {
+          ({ int *tmp_a = $Expr{a1};
+             for (int i=0; i < $intLiteralExpr{n}; ++i) {
+               tmp_a[i] = $Name{f}($Name{f1}(tmp_a[i]));
+             }
+             tmp_a;
+          })
+        })
+    | _ -> nothing()
+    end;
+
+  f.env = top.env;
+  a.env = top.env;
+  a.returnType = top.returnType;
+  local lerrors :: [Message] = a.errors ++ checkMapErrors(f, a, n, top.location);
+
+  forwards to
+    mkErrorCheck(lerrors,
+      case optmFwd of
+        just(fwd) -> fwd
+      | nothing() -> plainFwd
+      end
+    );
+}
+
+abstract production fold
+top::Expr ::= g::Name z::Expr a::Expr n::Integer
+{
+  propagate substituted;
+  top.pp = pp"fold ${g.pp} ${z.pp}, (${a.pp}) ${text(toString(n))}";
+
+  local plainFwd :: Expr =
+    ableC_Expr {
+      ({ int result = $Expr{z};
+         int *tmp_a = $Expr{a};
+         for (int i=0; i < $intLiteralExpr{n}; ++i) {
+           result = $Name{g}(result, tmp_a[i]);
+         }
+         result;
+      })
+    };
+
+  local optmFwd :: Maybe<Expr> =
+    case a of
+      nondestructiveMap(f1, a1, _) ->
+        just(ableC_Expr {
+          ({ int result = $Expr{z};
+             int *tmp_a = $Expr{a1};
+             for (int i=0; i < $intLiteralExpr{n}; ++i) {
+               result = $Name{g}(result, $Name{f1}(tmp_a[i]));
+             }
+             result;
+          })
+        })
+    | destructiveMap(f1, a1, _) ->
+        just(ableC_Expr {
+          ({ int result = $Expr{z};
+             int *tmp_a = $Expr{a1};
+             for (int i=0; i < $intLiteralExpr{n}; ++i) {
+               tmp_a[i] = $Name{f1}(tmp_a[i]);
+               result = $Name{g}(result, tmp_a[i]);
+             }
+             result;
+          })
+        })
+    | _ -> nothing()
+    end;
+
+  g.env = top.env;
+  z.env = top.env;
+  z.returnType = top.returnType;
+  a.env = top.env;
+  a.returnType = top.returnType;
+  local lerrors :: [Message] =
+    z.errors ++ a.errors ++ checkFoldErrors(g, z, a, n, top.location);
+
+  forwards to
+    mkErrorCheck(lerrors,
+      case optmFwd of
+        just(fwd) -> fwd
+      | nothing() -> plainFwd
+      end
+    );
+}
+
+function checkMapErrors
+[Message] ::= f::Decorated Name  a::Decorated Expr  n::Integer  l::Location
+{
+  local functionTypeErrors :: [Message] =
+    if !null(f.valueLookupCheck)
+    then f.valueLookupCheck
+    else
+      case f.valueItem.typerep of
+        functionType(retType, protoFunctionType(argTypes, false), _) ->
+          case retType of
+            builtinType(nilQualifier(), signedType(intType())) ->
+              if length(argTypes) != 1
+              then [err(l, "First argument to `map' must be a function accepting a single argument")]
+              else case head(argTypes) of
+                     builtinType(nilQualifier(), signedType(intType())) -> []
+                   | _ -> [err(l,
+                           "First argument to `map' must be a function accepting a single argument of type int, got " ++
+                           showType(head(argTypes)))]
+                   end
+          | _ -> [err(l, "Return type of first argument to `map' must be int, got " ++ showType(retType))]
+          end
+      | _ -> [err(l, "First argument to `map' must be a function, got " ++ showType(f.valueItem.typerep))]
+      end;
+
+  local mismatchedSizeErrors :: [Message] =
+    case a of
+      nondestructiveMap(_, _, n1) ->
+        if n != n1
+        then [err(l, "Mismatched array sizes in nested maps: " ++ toString(n) ++ " and " ++ toString(n1))]
+        else []
+    | destructiveMap(_, _, n1) ->
+        if n != n1
+        then [err(l, "Mismatched array sizes in nested maps: " ++ toString(n) ++ " and " ++ toString(n1))]
+        else []
+    | _ -> []
+    end;
+
+  local aErrors :: [Message] =
+    if compatibleTypes(a.typerep.defaultFunctionArrayLvalueConversion,
+         pointerType(nilQualifier(), builtinType(nilQualifier(), signedType(intType()))),
+         false, false)
+    then []
+    else [err(l, "Second argument to `map' must be of type int *, got " ++
+          showType(a.typerep.defaultFunctionArrayLvalueConversion))];
+
+  return functionTypeErrors ++ mismatchedSizeErrors ++ aErrors;
+}
+
+function checkFoldErrors
+[Message] ::= g::Decorated Name  z::Decorated Expr  a::Decorated Expr  n::Integer  l::Location
+{
+  local gErrors :: [Message] =
+    if !null(g.valueLookupCheck)
+    then g.valueLookupCheck
+    else
+      case g.valueItem.typerep of
+        functionType(retType, protoFunctionType(argTypes, false), _) ->
+          case retType of
+            builtinType(nilQualifier(), signedType(intType())) ->
+              if length(argTypes) != 2
+              then [err(l, "First argument to `fold' must be a function accepting two arguments")]
+              else case head(argTypes), head(tail(argTypes)) of
+                     builtinType(nilQualifier(), signedType(intType())),
+                     builtinType(nilQualifier(), signedType(intType())) -> []
+                   | _, _ -> [err(l,
+                           "First argument to `fold' must be a function accepting two arguments of type int, got " ++
+                           showType(head(argTypes)) ++ " and " ++
+                           showType(head(tail(argTypes))))]
+                   end
+          | _ -> [err(l, "Return type of first argument to `fold' must be int, got " ++ showType(retType))]
+          end
+      | _ -> [err(l, "First argument to `fold' must be a function, got " ++ showType(g.valueItem.typerep))]
+      end;
+
+  local zErrors :: [Message] =
+    case z.typerep of
+      builtinType(nilQualifier(), signedType(intType())) -> []
+    | _ -> [err(l, "Second argument to `fold' must be of type int, got " ++
+            showType(z.typerep))]
+    end;
+
+  local aErrors :: [Message] =
+    if compatibleTypes(a.typerep.defaultFunctionArrayLvalueConversion,
+         pointerType(nilQualifier(), builtinType(nilQualifier(), signedType(intType()))),
+         false, false)
+    then []
+    else [err(l, "Third argument to `fold' must be of type int *, got " ++
+          showType(a.typerep.defaultFunctionArrayLvalueConversion))];
+
+  return gErrors ++ zErrors ++ aErrors;
+}
+

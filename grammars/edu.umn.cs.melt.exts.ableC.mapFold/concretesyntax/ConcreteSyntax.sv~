@@ -1,0 +1,43 @@
+grammar edu:umn:cs:melt:exts:ableC:mapFold:concretesyntax;
+
+imports edu:umn:cs:melt:ableC:concretesyntax;
+imports edu:umn:cs:melt:ableC:abstractsyntax:host as abs;
+imports edu:umn:cs:melt:ableC:abstractsyntax:construction only fromId;
+imports silver:langutil only ast;
+
+imports edu:umn:cs:melt:exts:ableC:mapFold:abstractsyntax;
+
+marking terminal Map_t 'map' lexer classes {Ckeyword};
+marking terminal MapBang_t 'map!';
+marking terminal Fold_t 'fold' lexer classes {Ckeyword};
+
+concrete productions top::AssignExpr_c
+| 'map' f::Identifier_t a::Identifier_t n::DecConstant_t
+  {
+    top.ast = nondestructiveMap(fromId(f), abs:directRefExpr(fromId(a), location=a.location), toInt(n.lexeme), location=top.location);
+  }
+| 'map' f::Identifier_t '(' a::AssignExpr_c ')' n::DecConstant_t
+  {
+    top.ast = nondestructiveMap(fromId(f), a.ast, toInt(n.lexeme), location=top.location);
+  }
+
+concrete productions top::AssignExpr_c
+| 'map!' f::Identifier_t a::Identifier_t n::DecConstant_t
+  {
+    top.ast = destructiveMap(fromId(f), abs:directRefExpr(fromId(a), location=a.location), toInt(n.lexeme), location=top.location);
+  }
+| 'map!' f::Identifier_t '(' a::AssignExpr_c ')' n::DecConstant_t
+  {
+    top.ast = destructiveMap(fromId(f), a.ast, toInt(n.lexeme), location=top.location);
+  }
+
+concrete productions top::AssignExpr_c
+| 'fold' g::Identifier_t z::AssignExpr_c ',' a::Identifier_t n::DecConstant_t
+  {
+    top.ast = fold(fromId(g), z.ast, abs:directRefExpr(fromId(a), location=a.location), toInt(n.lexeme), location=top.location);
+  }
+| 'fold' g::Identifier_t z::AssignExpr_c ',' '(' a::AssignExpr_c ')' n::DecConstant_t
+  {
+    top.ast = fold(fromId(g), z.ast, a.ast, toInt(n.lexeme), location=top.location);
+  }
+

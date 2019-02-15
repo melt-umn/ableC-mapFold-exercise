@@ -1,0 +1,125 @@
+<project name='well_definedness' default='dist' basedir='.'>
+  <description>Generated build script for the grammar well_definedness</description>
+
+  <property environment='env'/>
+  <property name='jg' location='/home/evw/ableC-bundle/silver/generated/'/>
+  <property name='sh' location='/home/evw/ableC-bundle/silver/'/>
+  <property name='bin' location='${jg}/bin'/>
+  <property name='src' location='${jg}/src'/>
+
+  <path id='lib.classpath'>
+    <pathelement location='${sh}/jars/SilverRuntime.jar' />
+    <pathelement location='${sh}/jars/CopperRuntime.jar' />
+  </path>
+
+  <path id='compile.classpath'>
+    <pathelement location='${src}' />
+    <path refid='lib.classpath'/>
+    <pathelement location='${sh}/jars/CopperCompiler.jar' />
+    <pathelement location='/home/evw/ableC-bundle/silver/generated/bin/' />
+  </path>
+
+  <taskdef name='copper' classname='edu.umn.cs.melt.copper.ant.CopperAntTask' classpathref='compile.classpath'/>
+
+  <target name='copper'>
+
+    <copper packageName='edu.umn.cs.melt.ableC.host' parserName='Parser_edu_umn_cs_melt_ableC_host_ablecParser' outputFile='${src}/edu/umn/cs/melt/ableC/host/Parser_edu_umn_cs_melt_ableC_host_ablecParser.java' useSkin='XML' warnUselessNTs='false' avoidRecompile='true' dump='ERROR_ONLY' dumpFormat='HTML' dumpFile='Parser_edu_umn_cs_melt_ableC_host_ablecParser.copperdump.html'>
+      <inputs file='${src}/edu/umn/cs/melt/ableC/host/Parser_edu_umn_cs_melt_ableC_host_ablecParser.copper'/>
+    </copper>
+
+    <copper packageName='edu.umn.cs.melt.ableC.abstractsyntax.construction.parsing' parserName='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declsParser' outputFile='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declsParser.java' useSkin='XML' warnUselessNTs='false' avoidRecompile='true' dump='ERROR_ONLY' dumpFormat='HTML' dumpFile='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declsParser.copperdump.html'>
+      <inputs file='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declsParser.copper'/>
+    </copper>
+
+    <copper packageName='edu.umn.cs.melt.ableC.abstractsyntax.construction.parsing' parserName='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declParser' outputFile='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declParser.java' useSkin='XML' warnUselessNTs='false' avoidRecompile='true' dump='ERROR_ONLY' dumpFormat='HTML' dumpFile='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declParser.copperdump.html'>
+      <inputs file='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_declParser.copper'/>
+    </copper>
+
+    <copper packageName='edu.umn.cs.melt.ableC.abstractsyntax.construction.parsing' parserName='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_stmtParser' outputFile='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_stmtParser.java' useSkin='XML' warnUselessNTs='false' avoidRecompile='true' dump='ERROR_ONLY' dumpFormat='HTML' dumpFile='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_stmtParser.copperdump.html'>
+      <inputs file='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_stmtParser.copper'/>
+    </copper>
+
+    <copper packageName='edu.umn.cs.melt.ableC.abstractsyntax.construction.parsing' parserName='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_exprParser' outputFile='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_exprParser.java' useSkin='XML' warnUselessNTs='false' avoidRecompile='true' dump='ERROR_ONLY' dumpFormat='HTML' dumpFile='Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_exprParser.copperdump.html'>
+      <inputs file='${src}/edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/Parser_edu_umn_cs_melt_ableC_abstractsyntax_construction_parsing_exprParser.copper'/>
+    </copper>
+  </target>
+
+  <target name='init'>
+    <tstamp>
+      <format property='TIME' pattern='yyyy.MM.dd.HH.mm.ss'/>
+    </tstamp>
+    <mkdir dir='${bin}'/>
+  </target>
+
+  <target name='dist' depends=''>
+  </target>
+
+  <target name='jars' depends='grammars'>
+    <pathconvert refid='lib.classpath' pathsep=' ' property='man.classpath'>
+      <filtermapper><replacestring from=' ' to='%20' /></filtermapper>
+    </pathconvert>
+    <jar destfile='well_definedness.jar' zip64Mode='as-needed'>
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='well_definedness/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/host/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/exts/ableC/mapFold/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='core/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/concretesyntax/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/exts/ableC/mapFold/abstractsyntax/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/exts/ableC/mapFold/concretesyntax/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='core/monad/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='core/reflect/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/concretesyntax/cppTags/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/concretesyntax/c11/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/concretesyntax/gcc_exts/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='silver/langutil/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/host/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/construction/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/env/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/overloadable/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/substitution/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='silver/langutil/pp/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/injectable/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/builtins/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='silver/util/raw/treemap/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='silver/util/deque/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/*.class' />
+      <fileset dir='/home/evw/ableC-bundle/silver/generated/bin/' includes='edu/umn/cs/melt/ableC/concretesyntax/construction/*.class' />
+      <manifest>
+        <attribute name='Built-By' value='${user.name}' />
+        <attribute name='Implementation-Version' value='${TIME}' />
+        <attribute name='Main-Class' value='well_definedness.Main' />
+        <attribute name='Class-Path' value='${man.classpath}' />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name='grammars' depends='init, copper'>
+    <javac debug='on' classpathref='compile.classpath' srcdir='${src}' destdir='${bin}' includeantruntime='false'>
+      <include name='edu/umn/cs/melt/ableC/concretesyntax/construction/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/construction/parsing/*.java' />
+      <include name='silver/util/deque/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/builtins/*.java' />
+      <include name='silver/util/raw/treemap/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/injectable/*.java' />
+      <include name='core/monad/*.java' />
+      <include name='core/reflect/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/substitution/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/env/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/overloadable/*.java' />
+      <include name='silver/langutil/pp/*.java' />
+      <include name='edu/umn/cs/melt/ableC/concretesyntax/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/host/*.java' />
+      <include name='edu/umn/cs/melt/ableC/abstractsyntax/construction/*.java' />
+      <include name='silver/langutil/*.java' />
+      <include name='edu/umn/cs/melt/ableC/concretesyntax/cppTags/*.java' />
+      <include name='edu/umn/cs/melt/ableC/concretesyntax/c11/*.java' />
+      <include name='edu/umn/cs/melt/ableC/concretesyntax/gcc_exts/*.java' />
+      <include name='edu/umn/cs/melt/ableC/host/*.java' />
+      <include name='edu/umn/cs/melt/exts/ableC/mapFold/*.java' />
+      <include name='core/*.java' />
+      <include name='edu/umn/cs/melt/exts/ableC/mapFold/abstractsyntax/*.java' />
+      <include name='edu/umn/cs/melt/exts/ableC/mapFold/concretesyntax/*.java' />
+      <include name='well_definedness/*.java' />
+    </javac>
+  </target>
+</project>
